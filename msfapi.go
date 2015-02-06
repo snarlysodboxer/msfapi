@@ -11,7 +11,7 @@ import (
 
 type API struct {
 	Token string
-	Url   string
+	URL   string
 }
 
 type versionInfoResponse struct {
@@ -20,9 +20,10 @@ type versionInfoResponse struct {
 	API     string
 }
 
-func NewAPI(url string) *API {
+func New(url string) *API {
+	// TODO ensure url responds before continuing
 	api := new(API)
-	api.Url = url
+	api.URL = url
 	return api
 }
 
@@ -92,6 +93,14 @@ func (api *API) ModuleExecute(mType, name string, mapp map[string]interface{}) (
 	if err != nil {
 		return 0, err
 	}
+	if response["error"] != nil {
+		if response["error"].(bool) {
+			return 0, errors.New(fmt.Sprintf("%#v, %#v",
+				response["error_class"].(string),
+				response["error_message"].(string),
+			))
+		}
+	}
 	jobID := response["job_id"].(int64)
 	return jobID, nil
 }
@@ -124,7 +133,7 @@ func (api *API) request(request, response interface{}) error {
 	}
 
 	responseReader := bytes.NewReader(packedBytes)
-	resp, err := http.Post(api.Url, "binary/message-pack", responseReader)
+	resp, err := http.Post(api.URL, "binary/message-pack", responseReader)
 	if err != nil {
 		// return errors.New(fmt.Sprintf("problem with posting:\n\t%v\n", err))
 		return err
