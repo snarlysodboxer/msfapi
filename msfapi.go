@@ -101,7 +101,7 @@ func (api *API) ModuleExecute(mType, name string, mapp map[string]interface{}) (
 			))
 		}
 	}
-	jobID := response["job_id"].(int64)
+	jobID := int64ify(response["job_id"])
 	return jobID, nil
 }
 
@@ -152,4 +152,32 @@ func (api *API) request(request, response interface{}) error {
 		return err
 	}
 	return nil
+}
+
+func int64ify(n interface{}) int64 {
+	switch n := n.(type) {
+	case int:
+		return int64(n)
+	case int8:
+		return int64(n)
+	case int16:
+		return int64(n)
+	case int32:
+		return int64(n)
+	case int64:
+		return int64(n)
+	case uint:
+		return int64(n)
+	case uintptr:
+		return int64(n)
+	case uint8:
+		return int64(n)
+	case uint16:
+		return int64(n)
+	case uint32:
+		return int64(n)
+	case uint64:
+		return int64(n)
+	}
+	return int64(0)
 }
