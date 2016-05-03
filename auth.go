@@ -16,7 +16,7 @@ func (api *API) AuthLogin(user, pass string) (string, error) {
 		if loginResponse["error"].(bool) {
 			return "", errors.New(fmt.Sprintf("%#v, %#v",
 				loginResponse["error_class"].(string),
-				loginResponse["error_message"].(string),
+				string(loginResponse["error_message"].([]uint8)),
 			))
 		}
 	}
