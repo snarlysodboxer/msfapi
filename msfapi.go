@@ -7,7 +7,6 @@ import (
 	"gopkg.in/vmihailenco/msgpack.v2"
 	"io/ioutil"
 	"net/http"
-	// "reflect"
 )
 
 type API struct {
