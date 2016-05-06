@@ -1,7 +1,6 @@
 package msfapi
 
 import (
-	"errors"
 	"fmt"
 )
 
@@ -12,16 +11,7 @@ func (api *API) AuthLogin(user, pass string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if loginResponse["error"] != nil {
-		if loginResponse["error"].(bool) {
-			return "", errors.New(fmt.Sprintf("%#v, %#v",
-				loginResponse["error_class"].(string),
-				string(loginResponse["error_message"].([]uint8)),
-			))
-		}
-	}
-	token := fmt.Sprintf("%v", loginResponse["token"])
-	return token, nil
+	return string(loginResponse["token"].([]uint8)), nil
 }
 
 func (api *API) AuthTokenAdd(token string) error {
@@ -72,14 +62,6 @@ func (api *API) AuthLogout() error {
 	err := api.request(&request, &response)
 	if err != nil {
 		return err
-	}
-	if response["error"] != nil {
-		if response["error"].(bool) {
-			return errors.New(fmt.Sprintf("%#v, %#v",
-				response["error_class"].(string),
-				response["error_message"].(string),
-			))
-		}
 	}
 	api.Token = fmt.Sprintf("%v", response["token"])
 	return nil

@@ -7,6 +7,7 @@ import (
 	"gopkg.in/vmihailenco/msgpack.v2"
 	"io/ioutil"
 	"net/http"
+	// "reflect"
 )
 
 type API struct {
@@ -46,9 +47,33 @@ func (api *API) request(request, response interface{}) error {
 		return errors.New(fmt.Sprintf("problem with ReadAll:\n\t%v\n", err))
 	}
 
-	err = msgpack.Unmarshal(receiveBytes, response)
-	if err != nil {
-		return errors.New(fmt.Sprintf("problem unmarshaling %v:\n\t%v", receiveBytes, err))
+	switch resp.StatusCode {
+	case 200:
+		// "The request was successfully processed"
+		var stringInterface map[string]interface{}
+		err = msgpack.Unmarshal(receiveBytes, &stringInterface)
+		if err == nil {
+			if stringInterface["error"] != nil {
+				if stringInterface["error"].(bool) {
+					return errors.New(fmt.Sprintf("%s, %s", stringInterface["error_class"].(string), string(stringInterface["error_message"].([]uint8))))
+				}
+			}
+		}
+		err = msgpack.Unmarshal(receiveBytes, response)
+		if err != nil {
+			return errors.New(fmt.Sprintf("Error unmarshaling response: %s\n\t%s", err, string(receiveBytes)))
+		}
+		return nil
+	case 500:
+		return errors.New(fmt.Sprintf("The request resulted in an error: \n%s", string(receiveBytes)))
+	case 401:
+		return errors.New(fmt.Sprintf("The authentication credentials supplied were not valid"))
+	case 403:
+		return errors.New(fmt.Sprintf("The authentication credentials supplied were not granted access to the resource"))
+	case 404:
+		return errors.New(fmt.Sprintf("The request was sent to an invalid URI"))
+	default:
+		return errors.New(resp.Status)
 	}
 	return nil
 }
