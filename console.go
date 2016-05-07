@@ -20,7 +20,7 @@ func (api *API) ConsoleCreate() (consoleInstanceResponse, error) {
 	}
 	var consoleInstanceResponse = consoleInstanceResponse{
 		ID:     response["id"].(string),
-		Prompt: response["prompt"].(string),
+		Prompt: string(response["prompt"].([]uint8)),
 		Busy:   response["busy"].(bool),
 	}
 	return consoleInstanceResponse, nil
@@ -86,8 +86,8 @@ func (api *API) ConsoleRead(consoleID string) (consoleReadResponse, error) {
 	if err != nil {
 		return read, err
 	}
-	read.Data = response["data"].(string)
-	read.Prompt = response["prompt"].(string)
+	read.Data = string(response["data"].([]uint8))
+	read.Prompt = string(response["prompt"].([]uint8))
 	read.Busy = response["busy"].(bool)
 	return read, nil
 }
